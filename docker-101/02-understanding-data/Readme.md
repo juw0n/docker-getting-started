@@ -45,9 +45,10 @@ FROM ubuntu:22.04
 RUN apt update && apt install iputils-ping --yes
 EOF
 ##### The FROM... RUN... stuff is part of what is called a Dockerfile that is used to specify how to build a container image. 
+##### PS: anything (dependency or library) needed in a container at runtime should be built into the image!
 
-# Run a container based on that image
+#### Run a container based on that image
 docker run -it --rm my-ubuntu-image
 
-# Confirm that ping was pre-installed
+##### Confirm that ping was pre-installed
 ping 8.8.8.8 -c 5
