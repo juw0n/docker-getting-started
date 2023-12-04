@@ -29,3 +29,13 @@ running http://localhost:3000 of a web browser will open/lunch the app running i
 ==> docker ps
 ## To list both running and stopped container from the CLI:
 ==> docker ps -a
+## To stop a running container:
+==> docker stop <container-id>
+## To removed a stopped container;
+==> docker rm <container-id>
+## To check the list of local availbale docker images:
+==> docker image ls || docker images || docker image list
+
+#### Sharing Docker Images
+After building a docker image, you can share it. To share Docker images, you have to use a Docker registry. This is the default registry for storing and sharing docker images.
+All you need to do is create an account with docker and push docker images to the registry. you have the option of making the image public or private.
