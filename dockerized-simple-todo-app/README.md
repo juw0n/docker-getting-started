@@ -25,22 +25,39 @@ Without the port mapping, you wouldn't be able to access the application from th
 
 running http://localhost:3000 of a web browser will open/lunch the app running in the coutainer.
 
-## To list running container from the CLI:
+* To list running container from the CLI:
 ==> docker ps
-## To list both running and stopped container from the CLI:
+* To list both running and stopped container from the CLI:
 ==> docker ps -a
-## To stop a running container:
+* To stop a running container:
 ==> docker stop <container-id>
-## To removed a stopped container;
+* To removed a stopped container;
 ==> docker rm <container-id>
-## To check the list of local availbale docker images:
+* To force remove a runnit container:
+==> docker rm -f <container-id>
+* To check the list of local availbale docker images:
 ==> docker image ls || docker images || docker image list
 
-#### Sharing Docker Images
+### Sharing Docker Images
 After building a docker image, you can share it. To share Docker images, you have to use a Docker registry. This is the default registry for storing and sharing docker images.
 All you need to do is create an account with docker and push docker images to the registry. you have the option of making the image public or private.
-#### Push the image:
+
+### Push the image:
 * Use the docker tag command to give the getting-started image a new name. Replace YOUR-USER-NAME with your Docker ID.
 ==> docker tag getting-started YOUR-USER-NAME/NEW-IMAGE-NAME
 * After tagging, use *docker push* to push the image to docker registry.
 ==>  docker push YOUR-USER-NAME/NEW-IMAGE-NAME
+* To runs a new command inside a runnig container you use docker exec
+==> docker exec <container-id> <command>
+
+
+### The container's filesystem
+When a container runs, it uses the various layers from an image for its filesystem. Each container also gets its own "scratch space" to create/update/remove files. Any changes won't be seen in another container, even if they're using the same image.
+
+### Container volumes
+each container starts from the image definition each time it starts. While containers can create, update, and delete files, those changes are lost when you remove the container and Docker isolates all changes to that container. With volumes, you can change all of this.
+
+Volumes provide the ability to connect specific filesystem paths of the container back to the host machine. If you mount a directory in the container, changes in that directory are also seen on the host machine. If you mount that same directory across container restarts, you'd see the same files.
+
+There are two main types of volumes:
+* volume mounts:
