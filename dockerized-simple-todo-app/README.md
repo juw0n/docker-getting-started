@@ -39,3 +39,8 @@ running http://localhost:3000 of a web browser will open/lunch the app running i
 #### Sharing Docker Images
 After building a docker image, you can share it. To share Docker images, you have to use a Docker registry. This is the default registry for storing and sharing docker images.
 All you need to do is create an account with docker and push docker images to the registry. you have the option of making the image public or private.
+#### Push the image:
+* Use the docker tag command to give the getting-started image a new name. Replace YOUR-USER-NAME with your Docker ID.
+==> docker tag getting-started YOUR-USER-NAME/NEW-IMAGE-NAME
+* After tagging, use *docker push* to push the image to docker registry.
+==>  docker push YOUR-USER-NAME/NEW-IMAGE-NAME
