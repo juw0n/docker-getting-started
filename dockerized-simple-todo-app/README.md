@@ -55,9 +55,21 @@ All you need to do is create an account with docker and push docker images to th
 When a container runs, it uses the various layers from an image for its filesystem. Each container also gets its own "scratch space" to create/update/remove files. Any changes won't be seen in another container, even if they're using the same image.
 
 ### Container volumes
-each container starts from the image definition each time it starts. While containers can create, update, and delete files, those changes are lost when you remove the container and Docker isolates all changes to that container. With volumes, you can change all of this.
+Every container starts from the image definition each time it starts. While containers can create, update, and delete files, those changes are lost when you remove the container and Docker isolates all changes to that container. With volumes, you can change all of this.
 
 Volumes provide the ability to connect specific filesystem paths of the container back to the host machine. If you mount a directory in the container, changes in that directory are also seen on the host machine. If you mount that same directory across container restarts, you'd see the same files.
 
 There are two main types of volumes:
 * volume mounts:
+
+Create a volume by using the docker volume create command.
+==> docker volume create <volume-name>
+* you mount exiting volume on docker deamon to a container using <--mount> commad
+==> docker run -dp 127.0.0.1:3000:3000 --mount type=volume,src=todo-db,target=/etc/todos simple-todo-app
+* To know where docker store data inspect the volumes using <docker volume inspect> command.
+
+** The Mountpoint is the actual location of the data on the disk.
+
+* bind mounts:
+A bind mount is another type of mount that allows you to connect a directory from the host's machine file system to the container.
+While developing an application, you can employ a bind mount to link the source code directly into the container. Any modifications made to the code are instantly visible to the container upon saving a file. Consequently, you can execute processes within the container that actively monitor filesystem alterations and react accordingly.
