@@ -52,15 +52,18 @@ All you need to do is create an account with docker and push docker images to th
 
 
 ### The container's filesystem
-When a container runs, it uses the various layers from an image for its filesystem. Each container also gets its own "scratch space" to create/update/remove files. Any changes won't be seen in another container, even if they're using the same image.
+When a container runs, it uses the various layers from an image for its filesystem. Each container also gets its own "scratch space" to create/update/remove files. Any changes made in a container won't be seen in another container, even if they're using the same image.
 
 ### Container volumes
-Every container starts from the image definition each time it starts. While containers can create, update, and delete files, those changes are lost when you remove the container and Docker isolates all changes to that container. With volumes, you can change all of this.
+Every container starts from the image definition each time it starts. While containers can create, update, and delete files, those changes are lost when you remove the container. Docker isolates all changes to that container. 
+With volumes, you can change all of this i.e change made in a container.
 
-Volumes provide the ability to connect specific filesystem paths of the container back to the host machine. If you mount a directory in the container, changes in that directory are also seen on the host machine. If you mount that same directory across container restarts, you'd see the same files.
+*Volumes* provide the ability to connect specific filesystem paths of the container back to the host machine. If you mount a directory in the container, changes in that directory are also seen on the host machine. If you mount that same directory on a container on restarts, you'd see the same files.
 
-There are two main types of volumes:
+There are two main types of volumes or ways of mounting volume to a container:
 * volume mounts:
+This type of volume are created on docker deamon i.e on docker app itself. this type of volume is created using *volume create* command. and mount the created volume on/to acontainer using *--mount* command. 
+docker is the one that decide the location of this volume. the location of the volume can be seen/verify using the *volume inspec* command.
 
 Create a volume by using the docker volume create command.
 ==> docker volume create <volume-name>
@@ -70,6 +73,84 @@ Create a volume by using the docker volume create command.
 
 ** The Mountpoint is the actual location of the data on the disk.
 
-* bind mounts:
+* Bind mounts:
 A bind mount is another type of mount that allows you to connect a directory from the host's machine file system to the container.
 While developing an application, you can employ a bind mount to link the source code directly into the container. Any modifications made to the code are instantly visible to the container upon saving a file. Consequently, you can execute processes within the container that actively monitor filesystem alterations and react accordingly.
+
+bind mount allow shareing of file between the host and the container, and changes are immediately reflected on both sides. 
+
+==> docker run -it --mount type=bind,src="$(pwd)",target=/src ubuntu bash
+
+The above docker command starts a ubuntu container from an ubuntu image in an interactive bash session in the root directory of the container's filesystem.
+
+The *--mount* option tells Docker to create a bind mount, where *src* is the current working directory on your host machine, and *target* is where that directory should appear inside the container (/src).
+
+### Run your app in a development container
+The following steps describe how to run a development container with a bind mount that does the following:
+
+* Mount your source code into the container
+* Install all dependencies
+* Start nodemon to watch for filesystem changes
+You can use the CLI or Docker Desktop to run your container with a bind mount.
+
+for example:
+==>
+docker run -dp 127.0.0.1:3000:3000 \
+    -w /app --mount type=bind,src="$(pwd)",target=/app \
+    node:18-alpine \
+    sh -c "yarn install && yarn run dev"
+
+
+The following is a breakdown of the command:
+
+* -dp 127.0.0.1:3000:3000 - same as before. Run in detached (background) mode and create a port mapping
+* -w /app - sets the "working directory" or the current directory that the command will run from
+* --mount type=bind,src="$(pwd)",target=/app - bind mount the current directory from the host into the /app directory in the container
+* node:18-alpine - the image to use. Note that this is the base image for your app from the Dockerfile
+* sh -c "yarn install && yarn run dev" - the command. You're starting a shell using sh (alpine doesn't have bash) and running yarn install to install packages and then running yarn run dev to start the development server. If you look in the package.json, you'll see that the dev script starts nodemon.
+
+### You can watch the logs using
+
+==> docker logs <container-id>
+
+When done watching the logs, exit out by hitting *Ctrl+C*
+
+## Multi container apps
+One of the best practice in app containarization i belive is that "a container should do one thing and do it well". hence different part if an app should run in their own container and all the different container should then be connected to work together via NETWORKING.
+Some of the reason to run different part of an app in seperate container are:
+
+* Scaling: There's a good chance you'd have to scale APIs and front-ends differently than databases.
+* Versioning: Separate containers let you version and update versions in isolation.
+* Running multiple processes will require a process manager which adds complexity to container startup/shutdown.
+
+### Container networking
+Containers, by default, run in isolation and don't know anything about other processes or containers on the same machine. containers are allow to talk to one another via NETWORKING (container networking - placing containers on the same network). each container has its own IP address.
+
+There are two ways to put a container on a network:
+
+* Assign the network when starting the container.
+* Connect an already running container to a network.
+
+To create a network in docker, you use the *network create* command:
+==> docker network create <network-name>
+
+Start a MySQL container and attach it to the network;
+==>
+docker run -d \
+    --network todo-app --network-alias mysql \
+    -v todo-mysql-data:/var/lib/mysql \
+    -e MYSQL_ROOT_PASSWORD=secret \
+    -e MYSQL_DATABASE=todos \
+    mysql:8.0
+
+* If you run another container on the same network, how do you find the container?
+
+Ans: To answer the questions above and better understand container networking, you're going to make use of the *nicolaka/netshoot* container, which ships with a lot of tools that are useful for troubleshooting or debugging networking issues.
+
+* Start a new container using the nicolaka/netshoot image. Make sure to connect it to the same network.
+
+==> docker run -it --network todo-app nicolaka/netshoot
+
+* Inside the container, you're going to use the dig command, which is a useful DNS tool. You're going to look up the IP address for the hostname mysql.
+
+==> dig mysql
