@@ -10,4 +10,6 @@ At the application layer, containers are an abstraction that bundles/combine dep
 
 At the application layer, containers are an abstraction that bundles/combine dependencies and code. On a single machine/computer, several containers can operate independently as separate processes in user space(memory), sharing the OS kernel with one another.
 
+![containe vs Virtual Machine](https://github.com/juw0n/docker-getting-started/blob/main/container%20VS%20Vm.png)
+
 Overall, A container is a host machine process that is isolated from all other processes by virtue of being run in a sandbox (i.e the practice of running a program or application in a restricted environment, isolated from the rest of the system or other applications.). Linux has long-standing features like kernel namespaces and cgroups, which are utilised for this kind of isolation.
