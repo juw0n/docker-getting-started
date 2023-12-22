@@ -14,9 +14,12 @@ To build the image, you'll need to use a Dockerfile.
 ==> docker build -t simple-todo-app .
 
 docker build command uses the Dockerfile to build a new image. the -t flag tags the image for the name it should be called. The . at the end of the docker build command tells Docker that it should look for the Dockerfile in the current directory.
+
 3.  Starting an app container
 
 ==> docker run -dp 127.0.0.1:3000:3000 simple-todo-app
+
+docker run command is used to run/start a container by specifying the name of the image to use to create the container.
 
 The -d flag (short for --detach) runs the container in the background. The -p flag (short for --publish) creates a port mapping between the host and the container. The -p flag takes a string value in the format of HOST:CONTAINER, where HOST is the address on the host, and CONTAINER is the port on the container. The command publishes the container's port 3000 to 127.0.0.1:3000 (localhost:3000) on the host. 
 Without the port mapping, you wouldn't be able to access the application from the host.
@@ -152,3 +155,67 @@ Ans: To answer the questions above and better understand container networking, y
 * Inside the container, you're going to use the dig command, which is a useful DNS tool. You're going to look up the IP address for the hostname mysql.
 
 ==> dig mysql
+*  start your dev-ready container:
+==> docker run -dp 127.0.0.1:3000:3000 \
+  -w /app -v "$(pwd):/app" \
+  --network todo-app \
+  -e MYSQL_HOST=mysql \
+  -e MYSQL_USER=root \
+  -e MYSQL_PASSWORD=secret \
+  -e MYSQL_DB=todos \
+  node:18-alpine \
+  sh -c "yarn install && yarn run dev"
+
+*  To see the logs for the container (docker logs -f <container-id>)
+*  Connect to the mysql database and prove that the items are being written to the database. 
+==> docker exec -it <mysql-container-id> mysql -p todos
+==> mysql> select * from todo_items;
+
+### Use Docker Compose
+
+Docker Compose is a tool that helps you define and share multi-container applications. With Compose, you can create a YAML file to define the services and with a single command, you can spin everything up or tear it all down.
+
+sample of a docker compose document:
+=====================================================
+services:
+  app:
+    image: node:18-alpine
+    command: sh -c "yarn install && yarn run dev"
+    ports:
+      - 127.0.0.1:3000:3000
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+      MYSQL_DB: mysql
+
+  mysql:
+    image: mysql:8.0
+    volumes:
+      - todo-mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: mysql
+
+volumes:
+  todo-mysql-data:
+=======================================================================
+
+* start/run docke compose file by using the command below:
+==> docker compose up -d
+(-d flag to run everything in the background.)
+* Look at the compose logs using:
+==> docker compose logs -f
+* Tear all containers created by docker compose using the command:
+==> docker compose down
+
+### Image-building best practices
+To see the command that was used to create each layer within an image, use:
+==> docker image history <image name>
+
+Each of the lines represents a layer in the image. The display here shows the base at the bottom with the newest layer at the top. Using this, you can also quickly see the size of each layer, helping diagnose large images.
+#### Layer caching and multi-stage builds.
+there's an important lesson to learn to help decrease build times for container images. Once a layer changes, all downstream layers have to be recreated as well.
