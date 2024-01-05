@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  go-app-dev:
+    env_file:
+      - .env
+    depends_on: 
+      - go-roach-db
+    build:
+      context: .
+    container_name: go-rest-server
+    hostname: go-rest-server
+    networks:
+      - go-app-network
+    ports:
+      - 80:8080
+    environment:
+      - PGUSER=${PGUSER:-juwonGo}
+      - PGPASSWORD=${PGPASSWORD:?database password not set}
+      - PGHOST=${PGHOST:-go-db}
+      - PGPORT=${PGPORT:-26257}
+      - PGDATABASE=${PGDATABASE-golangdb}
+    deploy:
+      restart_policy:
+        condition: on-failure
+  go-roach-db:
+    image: cockroachdb/cockroach:latest-v20.1
+    container_name: go-roach-db
+    hostname: go-db
+    networks:
+      - go-app-network
+    ports:
+      - 26257:26257
+      - 8080:8080
+    volumes:
+      - go-app-volume:/cockroach/cockroach-data
+    command: start-single-node --insecure
+
+volumes:
+  go-app-volume:
+
+networks:
+  go-app-network:
+    driver: bridge
