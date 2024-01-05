@@ -16,3 +16,7 @@ The application offers two HTTP endpoints:
 * It responds with HTTP error 404 to any other request.
 
 The app is stateless and listen on TCp port defined by the value of an environmental variable.
+
+** The docker build command creates Docker images from the Dockerfile and a context. A build context is the set of files located in the specified path or URL.
+
+Rem: A container is a normal operating system process except that this process is isolated and has its own file system, its own networking, and its own isolated process tree separate from the host.
